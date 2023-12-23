@@ -5,7 +5,7 @@ canvas.height = window.innerHeight;
 canvas.style.border = '1px solid white';
 const particlesArray = [];
 let hue = 0;
-
+let debounce = false;
 
 window.addEventListener('resize', function(){
     canvas.width = window.innerWidth;
@@ -21,6 +21,8 @@ const mouse = {
 canvas.addEventListener('mousemove', function(event){
     mouse.x = event.x;
     mouse.y = event.y;
+    debounce = true;
+    
     for(let i = 0; i < 3; i++) {   
         particlesArray.push(new Particle());
    }
@@ -32,8 +34,6 @@ canvas.addEventListener('click', function(event){
     for(let i = 0; i < 3; i++) {   
          particlesArray.push(new Particle());
     }
-    
-
 })
 
 class Particle{ 
@@ -75,6 +75,21 @@ function handleParticles(){
     for(let i = 0; i < particlesArray.length; i++){
         particlesArray[i].update();
         particlesArray[i].draw();  
+        
+        for (let j = i; j < particlesArray.length; j++){
+            const dx = particlesArray[i].x - particlesArray[j].x;
+            const dy = particlesArray[i].y - particlesArray[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if(distance < 100){
+                ctx.beginPath();
+                ctx.strokeStyle = particlesArray[i].color;
+                ctx.lineWidth = this.size / 15;
+                ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
         if(particlesArray[i].size <= 0.2){
             particlesArray.splice(i, 1);
             i--;
@@ -84,10 +99,10 @@ function handleParticles(){
 }
 
 function animate(){
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    hue+=0.5;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    hue+=0.10;
 
     handleParticles();
     requestAnimationFrame(animate);
